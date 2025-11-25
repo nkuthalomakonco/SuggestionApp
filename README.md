@@ -1,3 +1,5 @@
+# Suggestion Site Application
+
 Suggestion Site Application
 A modern, scalable web application built with .NET, Blazor Server, and MongoDB for handling user suggestions with authentication and administrative workflows.
 
