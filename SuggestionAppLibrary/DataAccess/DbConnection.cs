@@ -3,16 +3,15 @@ using MongoDB.Driver;
 
 namespace SuggestionAppLibrary.DataAccess
 {
-    public class DbConnection
+    public class DbConnection : IDbConnection
     {
-        private readonly  IConfiguration _config;
-        private readonly  IMongoDatabase _db;
+        private readonly IConfiguration _config;
+        private readonly IMongoDatabase _db;
         private readonly string _connectionId = "MongoDB";
 
         public string DbName { get; set; }
         public string CategoryCollectionName { get; private set; } = "categories";
         public string StatusCollectionName { get; private set; } = "status";
-
         public string SuggestionCollectionName { get; private set; } = "suggestions";
 
         public string UserCollectionName { get; private set; } = "users";
