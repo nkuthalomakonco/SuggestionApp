@@ -1,24 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>038e164f-9fa1-4e12-8224-1f906498b70f</UserSecretsId>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="wwwroot\images\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Identity.Web" Version="4.1.1" />
-    <PackageReference Include="Microsoft.Identity.Web.UI" Version="4.1.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SuggestionAppLibrary\SuggestionAppLibrary.csproj" />
-  </ItemGroup>
 
 </Project>
