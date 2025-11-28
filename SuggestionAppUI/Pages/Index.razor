@@ -5,14 +5,20 @@
 @inject ISuggestionData suggestionData
 @inject IUserData userData
 @inject NavigationManager navManager
-@inject AuthenticationStateProvider authProvider
-@inject NavigationManager Navigation
-
-<h1 class="page-heading text-uppercase mb-4">Training Suggestions</h1>
-
-
-<button @onclick="GoToSecondPage">SampleData</button>
 
 @code {
-	void GoToSecondPage() => Navigation.NavigateTo("/SampleData");
+	private List<SuggestionModel> suggestions;
+	private List<CategoryModel> categories;
+	private List<StatusModel> statuses;
+	private UserModel loggedInUser;
+	private SuggestionModel archivingSuggestion;
+
+	private string selectedCategory = "All";
+	private string selectedStatus = "All";
+	private string searchText = "";
+	private bool isSortedByNew = true;
+
+	//https://www.youtube.com/watch?v=B-ETrXaAXlE&list=PLLWMQd6PeGY0cZFMqx5ijmdaD87sJKCsU&index=14
+
 }
+
