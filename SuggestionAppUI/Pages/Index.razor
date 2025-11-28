@@ -1,9 +1,18 @@
 ﻿@page "/"
 
-<PageTitle>Index</PageTitle>
+@inject ICategoryData categoryData
+@inject IStatusData statusData
+@inject ISuggestionData suggestionData
+@inject IUserData userData
+@inject NavigationManager navManager
+@inject AuthenticationStateProvider authProvider
+@inject NavigationManager Navigation
 
-<h1>Hello, world!</h1>
+<h1 class="page-heading text-uppercase mb-4">Training Suggestions</h1>
 
-Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<button @onclick="GoToSecondPage">SampleData</button>
+
+@code {
+	void GoToSecondPage() => Navigation.NavigateTo("/SampleData");
+}
