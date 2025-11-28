@@ -99,34 +99,80 @@ namespace SuggestionAppLibrary.DataAccess
                 //throw;
             }
         }
+        //public async Task CreateSuggestion(SuggestionModel suggestion)
+        //{
+        //    var client = _database.Client;
+        //    using var session = await client.StartSessionAsync();
+        //    session.StartTransaction();
+
+        //    try
+        //    {
+        //        var db = client.GetDatabase(_database.DbName);
+        //        var suggestionsInTransaction = db.GetCollection<SuggestionModel>(_database.SuggestionCollectionName);
+        //        await suggestionsInTransaction.InsertOneAsync(session, suggestion);
+
+        //        var usersInTransaction = db.GetCollection<UserModel>(_database.UserCollectionName);
+        //        var user = await _userData.GetUser(suggestion.Author.Id);
+
+        //        user.AuthoredSuggestions.Add(new BasicSuggestionModel(suggestion));
+        //        await usersInTransaction.ReplaceOneAsync(session, u => u.Id == user.Id, user);
+
+        //        await session.CommitTransactionAsync();
+
+        //        // we dont invalidate the cache since we require approval for each suggestion.
+        //    }
+        //    catch
+        //    {
+        //        await session.AbortTransactionAsync();
+        //        throw;
+        //    }
+        //}
         public async Task CreateSuggestion(SuggestionModel suggestion)
         {
             var client = _database.Client;
-            using var session = await client.StartSessionAsync();
-            session.StartTransaction();
 
-            try
+            bool transactionsSupported = client.Cluster.Description.Type != MongoDB.Driver.Core.Clusters.ClusterType.Standalone;
+
+            if (transactionsSupported)
             {
-                var db = client.GetDatabase(_database.DbName);
-                var suggestionsInTransaction = db.GetCollection<SuggestionModel>(_database.SuggestionCollectionName);
-                await suggestionsInTransaction.InsertOneAsync(session, suggestion);
+                using var session = await client.StartSessionAsync();
+                session.StartTransaction();
 
-                var usersInTransaction = db.GetCollection<UserModel>(_database.UserCollectionName);
+                try
+                {
+                    var db = client.GetDatabase(_database.DbName);
+                    var suggestionsInTransaction = db.GetCollection<SuggestionModel>(_database.SuggestionCollectionName);
+                    await suggestionsInTransaction.InsertOneAsync(session, suggestion);
+
+                    var usersInTransaction = db.GetCollection<UserModel>(_database.UserCollectionName);
+                    var user = await _userData.GetUser(suggestion.Author.Id);
+
+                    user.AuthoredSuggestions.Add(new BasicSuggestionModel(suggestion));
+                    await usersInTransaction.ReplaceOneAsync(session, u => u.Id == user.Id, user);
+
+                    await session.CommitTransactionAsync();
+                }
+                catch
+                {
+                    await session.AbortTransactionAsync();
+                    throw;
+                }
+            }
+            else
+            {
+                // No transaction fallback for standalone MongoDB
+                var db = client.GetDatabase(_database.DbName);
+                var suggestions = db.GetCollection<SuggestionModel>(_database.SuggestionCollectionName);
+                await suggestions.InsertOneAsync(suggestion);
+
+                var users = db.GetCollection<UserModel>(_database.UserCollectionName);
                 var user = await _userData.GetUser(suggestion.Author.Id);
 
                 user.AuthoredSuggestions.Add(new BasicSuggestionModel(suggestion));
-                await usersInTransaction.ReplaceOneAsync(session, u => u.Id == user.Id, user);
-
-                await session.CommitTransactionAsync();
-
-                // we dont invalidate the cache since we require approval for each suggestion.
-            }
-            catch
-            {
-                await session.AbortTransactionAsync();
-                throw;
+                await users.ReplaceOneAsync(u => u.Id == user.Id, user);
             }
         }
+
         public async Task<List<SuggestionModel>> GetUsersSuggestions(string userId)
         {
             var output = _cache.Get<List<SuggestionModel>>(userId);
